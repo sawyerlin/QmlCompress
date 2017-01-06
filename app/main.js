@@ -5,7 +5,7 @@ const mkdirp = require('mkdirp');
 const utils = require('./libs/utils.js');
 
 const qmlRoot = process.argv[2] || "buildDir",
-      outputRoot = process.argv[3] || "output";
+      outputRoot = process.argv[3] || "buildDir/ocs-freeboxv6/output";
 
 const importRegex = /import\s\"(.*)\"/ig,
       qmldirRegex = /(\w*)\s.*\n*/ig,
@@ -18,16 +18,15 @@ walk(qmlRoot, function(dir, files, level) {
     if (dir.indexOf("node_modules") === -1) {
         if (dir.indexOf('.git') === -1)
         files.forEach((fileName, index) => {
-            if (fileName[0] !== '.' //&& 
-                    //fileName.indexOf("PlayerPage.qml")!== -1
-                    ) {
-                if (path.extname(fileName).length > 1 || fileName.indexOf('qmldir') !== -1) {
+            if (fileName[0] !== '.') {
+                if (path.extname(fileName).length > 1 || 
+                        fileName.indexOf('qmldir') !== -1) {
                     var outputRootDir = path.join(outputRoot, dir);
                     mkdirp(outputRootDir, (err) => {
                         if (err) throw err;
                         var currentFile = path.join(dir, fileName),
                             currentOutputFile = path.join(outputRootDir, fileName);
-                        if (fileName.indexOf('.qml') !== -1) {
+                        if (fileName.indexOf('.qml') !== -1 && fileName.indexOf('Config.qml') === -1) {
                             fs.readFile(currentFile, 'utf8', (err, data) => {
                                 if (err) throw err;
                                 fs.writeFile(currentOutputFile, compress(data), {
