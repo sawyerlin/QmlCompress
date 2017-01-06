@@ -16,5 +16,11 @@
   "bugs": {
     "url": "https://github.com/sawyerlin/QmlCompress/issues"
   },
-  "homepage": "https://github.com/sawyerlin/QmlCompress#readme"
+  "homepage": "https://github.com/sawyerlin/QmlCompress#readme",
+  "devDependencies": {
+    "filewalker": "^0.1.3",
+    "mkdirp": "^0.5.1",
+    "node-file-walker": "0.0.1",
+    "walk": "^2.3.9"
+  }
 }
