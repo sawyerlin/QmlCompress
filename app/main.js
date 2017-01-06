@@ -16,31 +16,35 @@ var currentDir = qmlRoot,
     currentOutputDir = outputRoot;
 walk(qmlRoot, function(dir, files, level) {
     if (dir.indexOf("node_modules") === -1) {
+        if (dir.indexOf('.git') === -1)
         files.forEach((fileName, index) => {
-            //if (fileName.indexOf('StyleText.qml') !== -1)
-            if (path.extname(fileName).length > 1 || fileName.indexOf('qmldir') !== -1) {
-                var outputRootDir = path.join(outputRoot, dir);
-                mkdirp(outputRootDir, (err) => {
-                    if (err) throw err;
-                    var currentFile = path.join(dir, fileName),
-                        currentOutputFile = path.join(outputRootDir, fileName);
-                    if (fileName.indexOf('.qml') !== -1) {
-                        fs.readFile(currentFile, 'utf8', (err, data) => {
-                            if (err) throw err;
-                            fs.writeFile(currentOutputFile, compress(data), {
-                                flag: 'w+'
-                            }, (err) => {
+            if (fileName[0] !== '.' //&& 
+                    //fileName.indexOf("PlayerPage.qml")!== -1
+                    ) {
+                if (path.extname(fileName).length > 1 || fileName.indexOf('qmldir') !== -1) {
+                    var outputRootDir = path.join(outputRoot, dir);
+                    mkdirp(outputRootDir, (err) => {
+                        if (err) throw err;
+                        var currentFile = path.join(dir, fileName),
+                            currentOutputFile = path.join(outputRootDir, fileName);
+                        if (fileName.indexOf('.qml') !== -1) {
+                            fs.readFile(currentFile, 'utf8', (err, data) => {
                                 if (err) throw err;
+                                fs.writeFile(currentOutputFile, compress(data), {
+                                    flag: 'w+'
+                                }, (err) => {
+                                    if (err) throw err;
+                                });
                             });
-                        });
-                    } else {
-                        if (fileName[0] !== '.') {
-                            fs.createReadStream(currentFile).pipe(fs.createWriteStream(currentOutputFile));
                         } else {
-                            console.log(fileStats.name);
+                            if (fileName[0] !== '.') {
+                                fs.createReadStream(currentFile).pipe(fs.createWriteStream(currentOutputFile));
+                            } else {
+                                console.log(fileStats.name);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         });
     }
@@ -68,44 +72,39 @@ function compress(data) {
         });
         if (!isMatched) {
             if (compressString[compressString.length - 1] === ";") {
-                if ((p2Test[0] === "}"
-                            || p2Test[0] === "."
-                            || p2Test[0] === "'"
-                            || p2Test[0] === "\""
-                            || p2Test[0] === "+"
-                            || p2Test[0] === "-"
-                            || p2Test[0] === "*"
-                            || p2Test[0] === "/"
-                            || p2Test[0] === "&"
-                            || p2Test[0] === "|"
-                    )
-                        && compressString.slice(compressString.length - 6, compressString.length - 1) !== "break"
-                   ) {
+                if ((p2Test[0] === "}" || 
+                            p2Test[0] === "." || 
+                            p2Test[0] === "'" || 
+                            p2Test[0] === "\"" || 
+                            p2Test[0] === "+" || 
+                            p2Test[0] === "-" || 
+                            p2Test[0] === "*" || 
+                            p2Test[0] === "/" || 
+                            p2Test[0] === "&" || 
+                            p2Test[0] === "|" ) && 
+                        compressString.slice(compressString.length - 6, compressString.length - 1) !== "break") {
                     compressString = compressString.slice(0, -1);
                 }
             } else {
-                if (p2Test[0] !== "}" 
-                        && p2Test[0] !== "]"
-                        && canAppend) {
+                if (p2Test[0] !== "}" && 
+                        p2Test[0] !== "]" && 
+                        p2Test[0] !== "," &&
+                        canAppend) {
                     p2 = ";" + p2;
                 }
             }
-            if (p2Test[p2Test.length - 1] !== "{"
-                    && p2Test[p2Test.length - 1] !== "}"
-                    && p2Test[p2Test.length - 1] !== "["
-                    && p2Test[p2Test.length - 1] !== "]"
-                    && p2Test[p2Test.length - 1] !== ";"
-                    && p2Test[p2Test.length - 1] !== "+"
-                    && p2Test[p2Test.length - 1] !== ",") {
+            if (p2Test[p2Test.length - 1] !== "{" && 
+                    p2Test[p2Test.length - 1] !== "}" && 
+                    p2Test[p2Test.length - 1] !== "[" && 
+                    p2Test[p2Test.length - 1] !== "]" && 
+                    p2Test[p2Test.length - 1] !== ";" && 
+                    p2Test[p2Test.length - 1] !== "+" && 
+                    p2Test[p2Test.length - 1] !== ",") {
                 compressString += p2 + ";";
             } else {
                 compressString += p2;
             }
-            /*
-             *console.log("======================");
-             *console.log(p2);
-             *console.log(compressString);
-             */
+            
         }
     });
     return compressString;
