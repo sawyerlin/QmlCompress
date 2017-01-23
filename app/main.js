@@ -2,15 +2,9 @@ const walk = require('node-file-walker');
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
-const utils = require('./libs/utils.js');
 
-const qmlRoot = process.argv[2] || "buildDir",
-      outputRoot = process.argv[3] || "buildDir/ocs-freeboxv6/output";
-
-const importRegex = /import\s\"(.*)\"/ig,
-      qmldirRegex = /(\w*)\s.*\n*/ig,
-      componentRegex = /(\w*\s*\{\n*.*\n*\})/ig,
-      compressRegex = /(\s*)(.+)/ig;
+const qmlRoot = process.argv[2] || "qml",
+      outputRoot = process.argv[3] || "output";
 
 var currentDir = qmlRoot,
     currentOutputDir = outputRoot;
@@ -51,7 +45,7 @@ walk(qmlRoot, function(dir, files, level) {
 
 function compress(data) {
     var compressString = "";
-    data.replace(compressRegex, function(match, p1, p2) {
+    data.replace(/(\s*)(.+)/ig, function(match, p1, p2) {
         var p2Test = p2.trim(),
             canAppend = false,
             isMatched = false;
@@ -108,22 +102,3 @@ function compress(data) {
     });
     return compressString;
 }
-
-/*
- *    fs.readFile(qmlRootFile, 'utf8', (err, data) => {
- *        if (err) throw err;
- *
- *        console.log(compress(data));
- *        var imports = utils.parse(importRegex, data);
- *        imports.forEach((importItem) => {
- *            var qmldir = path.join(qmlRoot, importItem, 'qmldir'); 
- *            fs.readFile(qmldir, 'utf-8', (err, data) => {
- *                if (err) throw err;
- *                var components = utils.parse(qmldirRegex, data);
- *                console.log(components);
- *            });
- *        });
- *        var items = utils.parse(componentRegex, data);
- *        console.log(items);
- *    });
- */
